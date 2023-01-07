@@ -10,8 +10,7 @@
 - [`海词`](https://dict.cn/)
 - [`有道同义词`](https://dict.youdao.com/suggest?q=accumulate&doctype=json), **Unofficial** API
 - [`etymonline`](https://www.etymonline.com/)
-- [`Longman`](https://www.ldoceonline.com/)
-- [`LibreTranslate`](https://libretranslate.com/), Free and Open Source Machine Translation API.
+- [`Longman`](https://www.ldoceonline.com/).
 
 `fanyi.el` has integrations with:
 
@@ -65,17 +64,14 @@ If you want <kbd>M-x fanyi</kbd> to list only `fanyi-dwim`, `fanyi-dwim2` and
                      ;; Etymonline
                      fanyi-etymon-provider
                      ;; Longman
-                     fanyi-longman-provider
-                     ;; LibreTranslate
-                     fanyi-libre-provider)))
+                     fanyi-longman-provider)))
 
 ;; For non-`use-package' users
 (custom-set-variables
  '(fanyi-providers '(fanyi-haici-provider
                      fanyi-youdao-thesaurus-provider
                      fanyi-etymon-provider
-                     fanyi-longman-provider
-                     fanyi-libre-provider)))
+                     fanyi-longman-provider)))
 ```
 
 By default, `M-x fanyi-dwim` will move the point to the new created `*fanyi* `buffer.
