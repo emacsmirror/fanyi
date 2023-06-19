@@ -300,8 +300,7 @@
 
   (let ((buf (get-buffer-create fanyi-buffer-name)))
     (with-current-buffer buf
-      (let ((inhibit-read-only t)
-            (inhibit-point-motion-hooks t))
+      (let ((inhibit-read-only t))
         ;; Clear the previous search result.
         (erase-buffer)
         (fanyi-mode)))
