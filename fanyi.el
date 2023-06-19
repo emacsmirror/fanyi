@@ -133,14 +133,14 @@
 
 (defun fanyi--spawn (instance)
   "Spawn a thread to lookup words via INSTANCE."
-  (let ((url (format (oref instance :url)
-                     (oref instance :word))))
+  (let ((url (format (oref instance url)
+                     (oref instance word))))
     (cl-pushnew
      (make-thread
       (lambda ()
-        (let ((url-request-method (oref instance :method))
-              (url-request-extra-headers (oref instance :headers))
-              (url-request-data (oref instance :body)))
+        (let ((url-request-method (oref instance method))
+              (url-request-extra-headers (oref instance headers))
+              (url-request-data (oref instance body)))
           (url-retrieve url (lambda (status)
                               ;; Something went wrong.
                               (when (or (not status) (plist-member status :error))
@@ -157,7 +157,7 @@
                               ;; `json-read' failed to parse in undecoded buffer.
                               ;;
                               ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=50391
-                              (let ((result (pcase (oref instance :api-type)
+                              (let ((result (pcase (oref instance api-type)
                                               ('xml (libxml-parse-html-region (point) (point-max) url))
                                               ('json (json-parse-buffer)))))
                                 (unless

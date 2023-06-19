@@ -177,7 +177,7 @@ See `fanyi-sound-player'."
 (cl-defmethod fanyi-set-query-word ((this fanyi-base-service) query)
   "Set QUERY word to THIS.
 QUERY could be a sentence for some services."
-  (oset this :word (url-hexify-string query)))
+  (oset this word (url-hexify-string query)))
 
 (cl-defmethod fanyi-parse-from ((this fanyi-base-service) _dom)
   "Implement your own `fanyi-parse-from' for THIS class."

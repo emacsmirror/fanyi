@@ -122,18 +122,18 @@ A \='not-found exception will be thrown if there is no result."
   ;; Syllable, could be nil.
   (when-let* ((str (dom-attr (dom-by-class dom "keyword") 'tip))
               (matches (s-match "\\([a-zA-Z·]+\\)" str)))
-    (oset this :syllable (nth 1 matches)))
+    (oset this syllable (nth 1 matches)))
   ;; Star and description, could be nil.
   (when-let* ((str (dom-attr (dom-by-class dom "level-title") 'level))
               (matches (s-match "\\([12345]\\)" str)))
-    (oset this :star (string-to-number (nth 1 matches)))
-    (oset this :star-desc str))
+    (oset this star (string-to-number (nth 1 matches)))
+    (oset this star-desc str))
   ;; Phonetics, a list of (pronunciation, female sound url, male sound url)
   ;;
   ;; British: female, male
   ;; American: female, male
   (let ((phonetics (dom-children (dom-by-class dom "phonetic"))))
-    (oset this :phonetics
+    (oset this phonetics
           (cl-loop for p being the elements of phonetics using (index idx)
                    ;; British -> 1
                    ;; American -> 3
@@ -150,7 +150,7 @@ A \='not-found exception will be thrown if there is no result."
                             (dom-attr (dom-by-class p "^\\(sound\\)$") 'naudio)))))
   ;; Brief paraphrases, list of (pos, paraphrase)
   (let ((paraphrases (butlast (dom-by-tag (dom-by-class dom "dict-basic-ul") 'li))))
-    (oset this :paraphrases
+    (oset this paraphrases
           (cl-loop for p in paraphrases
                    for pos = (dom-text (nth 3 p))
                    for para = (dom-text (nth 5 p))
@@ -158,20 +158,20 @@ A \='not-found exception will be thrown if there is no result."
   ;; Distribution of senses, could be nil
   (when-let* ((chart-basic (dom-attr (dom-by-id dom "dict-chart-basic") 'data))
               (json (json-read-from-string (url-unhex-string chart-basic))))
-    (oset this :distribution
+    (oset this distribution
           ;; Transform (\1 (percent . 55) (sense . "abc")) into (55 "abc")
           (cl-loop for j in json
                    collect (seq-map #'cdr (seq-drop j 1)))))
   ;; The related words, could be nil.
   (let ((shapes (dom-children (dom-by-class dom "shape"))))
-    (oset this :related
+    (oset this related
           (seq-partition (cl-loop for i in shapes
                                   when (consp i)
                                   collect (s-trim (dom-text i)))
                          2)))
   ;; The etymons of the word, could be nil.
   (let ((etymons (dom-attributes (dom-children (dom-by-class dom "layout etm")))))
-    (oset this :etymons (cl-loop for i in etymons
+    (oset this etymons (cl-loop for i in etymons
                                  when (consp i)
                                  collect (dom-texts i)))))
 
@@ -183,16 +183,16 @@ before calling this method."
     ;; The headline about Haici service.
     (insert "# 海词\n\n")
     ;; Syllables and star/level description.
-    (insert (oref this :syllable)
+    (insert (oref this syllable)
             " "
-            (s-repeat (oref this :star) "★")
+            (s-repeat (oref this star) "★")
             " "
-            (oref this :star-desc)
+            (oref this star-desc)
             "\n\n")
     ;; Phonetics.
     ;; British: pronunciation, female sound url, male sound url
     ;; American: pronunciation, female sound url, male sound url
-    (let ((phonetics (oref this :phonetics)))
+    (let ((phonetics (oref this phonetics)))
       (cl-assert (equal (length phonetics) 2))
       (cl-loop for i from 0 to 1
                for (pronunciation female male) = (nth i phonetics)
@@ -206,7 +206,7 @@ before calling this method."
                                                                  :color-symbols
                                                                  (("color" . ,(face-attribute 'fanyi-female-speaker-face :foreground)))))))
                                  'action #'fanyi-play-sound
-                                 'button-data (format (oref this :sound-url) female)
+                                 'button-data (format (oref this sound-url) female)
                                  'face 'fanyi-female-speaker-face
                                  'follow-link t
                                  'help-echo "女声版发音")
@@ -219,7 +219,7 @@ before calling this method."
                                                                  :color-symbols
                                                                  (("color" . ,(face-attribute 'fanyi-male-speaker-face :foreground)))))))
                                  'action #'fanyi-play-sound
-                                 'button-data (format (oref this :sound-url) male)
+                                 'button-data (format (oref this sound-url) male)
                                  'face 'fanyi-male-speaker-face
                                  'follow-link t
                                  'help-echo "男声版发音"))
@@ -228,12 +228,12 @@ before calling this method."
     ;; - n. 荣誉；荣幸；尊敬；信用；正直；贞洁
     ;; - vt. 尊敬；使荣幸；对...表示敬意；兑现
     ;; ...
-    (cl-loop for pa in (oref this :paraphrases)
+    (cl-loop for pa in (oref this paraphrases)
              for (pos p) = pa
              do (insert "- " pos " " p "\n"))
     (insert "\n")
     ;; Make a button for distribution chart.
-    (when-let ((dist (oref this :distribution)))
+    (when-let ((dist (oref this distribution)))
       (insert-button "Click to view the distribution chart"
                      'action (lambda (dist)
                                ;; `switch-to-buffer' is used in `chart-bar-quickie' which means a new chart buffer will
@@ -272,7 +272,7 @@ before calling this method."
                      'follow-link t)
       (insert "\n\n"))
     ;; Make buttons for related words.
-    (when-let ((rs (oref this :related)))
+    (when-let ((rs (oref this related)))
       (cl-loop for r in rs
                for (k v) = r
                do (insert k " ")
@@ -283,7 +283,7 @@ before calling this method."
                do (insert " "))
       (insert "\n\n"))
     ;; The etymons.
-    (when-let ((etymons (oref this :etymons)))
+    (when-let ((etymons (oref this etymons)))
       (insert "## 起源\n\n")
       (cl-loop for i in etymons
                do (insert "- " i "\n"))
@@ -291,7 +291,7 @@ before calling this method."
     ;; Visit the url for more information.
     (insert-button "Browse the full page via eww"
                    'action #'eww
-                   'button-data (format (oref this :url) (oref this :word))
+                   'button-data (format (oref this url) (oref this word))
                    'follow-link t)
     (insert "\n\n")))
 

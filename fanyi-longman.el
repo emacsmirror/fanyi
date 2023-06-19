@@ -231,7 +231,7 @@ Typically it can be a list of strings or \"riched\" strings."))
             (head2 (pop wordfams)))
         (cl-assert (s-blank-str? head1))
         (cl-assert (dom-by-class head2 "asset_intro")))
-      (oset this :word-family
+      (oset this word-family
             (cl-loop with pos = ""
                      with fam-set = nil
                      for node in wordfams
@@ -249,61 +249,61 @@ Typically it can be a list of strings or \"riched\" strings."))
                      finally return fam-set)))
     ;; Dicts
     (let ((dict-entries (dom-by-class dict "^\\(dictentry\\)$")))
-      (oset this :dicts
+      (oset this dicts
             (cl-loop for entry in dict-entries
                      collect (let ((name (dom-text (dom-by-class entry "dictionary_intro")))
                                    (head (dom-by-class entry "Head"))
                                    (senses (dom-by-class entry "^\\(Sense\\)$"))
                                    (dict (fanyi-longman-dict)))
-                               (oset dict :name name)
+                               (oset dict name name)
                                ;; Hyphenation.
                                (when-let ((hyph (dom-by-class head "HYPHENATION")))
-                                 (oset dict :hyphenation (dom-text hyph)))
+                                 (oset dict hyphenation (dom-text hyph)))
                                ;; Pronunciation.
                                (when-let ((codes (dom-by-class head "PronCodes")))
-                                 (oset dict :pronunciation (s-trim (dom-texts codes ""))))
+                                 (oset dict pronunciation (s-trim (dom-texts codes ""))))
                                ;; Level.
                                (when-let ((level (dom-by-class head "LEVEL")))
-                                 (oset dict :level (cons (s-trim (dom-text level)) (dom-attr level 'title))))
+                                 (oset dict level (cons (s-trim (dom-text level)) (dom-attr level 'title))))
                                ;; Frequency.
                                (when-let ((freqs (dom-by-class head "FREQ")))
-                                 (oset dict :freqs (cl-loop for f in freqs
+                                 (oset dict freqs (cl-loop for f in freqs
                                                             collect (cons (s-trim (dom-text f)) (dom-attr f 'title)))))
                                ;; Academic.
                                (when-let ((ac (dom-by-class head "AC")))
-                                 (oset dict :academy (cons (dom-text ac) (dom-attr ac 'title))))
+                                 (oset dict academy (cons (dom-text ac) (dom-attr ac 'title))))
                                ;; Part of speech.
                                (when-let ((pos (dom-by-class head "POS")))
-                                 (oset dict :pos (s-trim (dom-text pos))))
+                                 (oset dict pos (s-trim (dom-text pos))))
                                ;; Inflection.
                                (when-let ((inflect (dom-by-class head "Inflections")))
-                                 (oset dict :inflection (s-trim (dom-texts inflect ""))))
+                                 (oset dict inflection (s-trim (dom-texts inflect ""))))
                                ;; Grammar.
                                (when-let ((gram (dom-by-class head "^\\(GRAM\\)$")))
-                                 (oset dict :grammar (s-trim (dom-texts gram ""))))
+                                 (oset dict grammar (s-trim (dom-texts gram ""))))
                                ;; Voice
-                               (oset dict :british (dom-attr (dom-by-class head "brefile") 'data-src-mp3))
-                               (oset dict :american (dom-attr (dom-by-class head "amefile") 'data-src-mp3))
+                               (oset dict british (dom-attr (dom-by-class head "brefile") 'data-src-mp3))
+                               (oset dict american (dom-attr (dom-by-class head "amefile") 'data-src-mp3))
                                ;; Senses.
-                               (oset dict :senses (cl-loop for sense in senses
+                               (oset dict senses (cl-loop for sense in senses
                                                            collect (let ((dict-sense (fanyi-longman-dict-sense)))
                                                                      ;; Signpost.
                                                                      (when-let ((signpost (dom-by-class sense "SIGNPOST")))
-                                                                       (oset dict-sense :signpost (dom-text signpost)))
+                                                                       (oset dict-sense signpost (dom-text signpost)))
                                                                      ;; Grammar.
                                                                      (when-let ((grammar (dom-by-class sense "^\\(GRAM\\)$")))
-                                                                       (oset dict-sense :grammar (s-trim (dom-texts grammar ""))))
+                                                                       (oset dict-sense grammar (s-trim (dom-texts grammar ""))))
                                                                      ;; Register label.
                                                                      (when-let ((label (dom-by-class sense "REGISTERLAB")))
-                                                                       (oset dict-sense :registerlab (s-trim (dom-text label))))
+                                                                       (oset dict-sense registerlab (s-trim (dom-text label))))
                                                                      ;; LEXUNIT.
                                                                      (when-let ((unit (dom-by-class sense "LEXUNIT")))
-                                                                       (oset dict-sense :lexunit (s-trim (dom-text unit))))
+                                                                       (oset dict-sense lexunit (s-trim (dom-text unit))))
                                                                      ;; Geography.
                                                                      (when-let ((geo (dom-by-class sense "GEO")))
-                                                                       (oset dict-sense :geo (s-trim (dom-text geo))))
+                                                                       (oset dict-sense geo (s-trim (dom-text geo))))
                                                                      ;; Definition.
-                                                                     (oset dict-sense :def
+                                                                     (oset dict-sense def
                                                                            (seq-map (lambda (node)
                                                                                       (pcase (type-of node)
                                                                                         ('string (s-trim node))
@@ -319,14 +319,14 @@ Typically it can be a list of strings or \"riched\" strings."))
                                                                      (when-let* ((crossref (dom-by-class sense "Crossref"))
                                                                                  (href (dom-attr (dom-child-by-tag crossref 'a) 'href)))
                                                                        (cl-assert (s-prefix? "/dictionary/" href))
-                                                                       (oset dict-sense :crossref
+                                                                       (oset dict-sense crossref
                                                                              (cons (s-trim (dom-texts crossref ""))
                                                                                    (car (s-split "#" (substring href 12))))))
                                                                      ;; Synonym.
                                                                      (when-let ((syn (dom-by-class sense "^\\(SYN\\)$")))
-                                                                       (oset dict-sense :syn (s-trim (dom-text syn))))
+                                                                       (oset dict-sense syn (s-trim (dom-text syn))))
                                                                      ;; Examples
-                                                                     (oset dict-sense :examples
+                                                                     (oset dict-sense examples
                                                                            (cl-loop for example in (dom-by-class sense "EXAMPLE")
                                                                                     collect (cons (dom-attr (dom-by-class example "speaker") 'data-src-mp3)
                                                                                                   (s-trim (s-replace-all '(("\u00a0" . "")
@@ -334,12 +334,12 @@ Typically it can be a list of strings or \"riched\" strings."))
                                                                                                                          (dom-texts example ""))))))
                                                                      ;; Footnote.
                                                                      (let ((footnote (dom-by-class sense "F2NBox")))
-                                                                       (oset dict-sense :footnote-expl
+                                                                       (oset dict-sense footnote-expl
                                                                              (cl-loop for child in (dom-children (dom-by-class footnote "EXPL"))
                                                                                       concat (cl-etypecase child
                                                                                                (string child)
                                                                                                (list (concat "*" (dom-text child) "*")))))
-                                                                       (oset dict-sense :footnote-example
+                                                                       (oset dict-sense footnote-example
                                                                              (cl-loop for child in (dom-children (dom-by-class footnote "EXAMPLE"))
                                                                                       concat (cl-etypecase child
                                                                                                (string child)
@@ -348,7 +348,7 @@ Typically it can be a list of strings or \"riched\" strings."))
                                dict))))
     ;; Etymon
     (let ((etymon (dom-by-class (dom-by-class dict "etym") "Sense")))
-      (oset this :etymon (dom-texts etymon "")))))
+      (oset this etymon (dom-texts etymon "")))))
 
 (cl-defmethod fanyi-render ((this fanyi-longman-service))
   "Render THIS page into a buffer named `fanyi-buffer-name'.
@@ -358,7 +358,7 @@ before calling this method."
     ;; The headline about Longman dictionary service.
     (insert "# Longman\n\n")
     ;; Word family section.
-    (when-let (word-family (oref this :word-family))
+    (when-let (word-family (oref this word-family))
       (insert (propertize "Word family"
                           'display (when (fanyi-display-glyphs-p)
                                      (fanyi-longman-svg-tag-make "Word family" 'fanyi-longman-svg-asset-face))))
@@ -374,16 +374,16 @@ before calling this method."
                                              'follow-link t)))
       (insert "\n\n"))
     ;; Dicts.
-    (cl-loop for dict in (oref this :dicts)
-             do (insert "## " (oref dict :name) "\n\n")
+    (cl-loop for dict in (oref this dicts)
+             do (insert "## " (oref dict name) "\n\n")
              ;; job /dʒɒb $ dʒɑːb/ ●●● S1 W1 AWL (noun) 🔊 🔊
              ;; ^            ^       ^               ^
              ;; hyphenation  pron    level           pos
-             do (when-let ((hyph (oref dict :hyphenation)))
+             do (when-let ((hyph (oref dict hyphenation)))
                   (insert hyph))
-             do (when-let ((pron (oref dict :pronunciation)))
+             do (when-let ((pron (oref dict pronunciation)))
                   (insert " " pron))
-             do (when-let ((level (oref dict :level)))
+             do (when-let ((level (oref dict level)))
                   (insert " "
                           (propertize (car level) 'help-echo (cdr level))))
              do (insert
@@ -393,31 +393,31 @@ before calling this method."
                                                 'help-echo desc
                                                 'display (when (fanyi-display-glyphs-p)
                                                            (fanyi-longman-svg-tag-make freq 'fanyi-longman-svg-asset-face))))
-                                  (oref dict :freqs))))
-             do (when-let ((ac (oref dict :academy)))
+                                  (oref dict freqs))))
+             do (when-let ((ac (oref dict academy)))
                   (insert " "
                           (propertize (car ac)
                                       'help-echo (cdr ac)
                                       'display (when (fanyi-display-glyphs-p)
                                                  (fanyi-longman-svg-tag-make (car ac) 'fanyi-longman-svg-asset-face)))))
-             do (when-let ((pos (oref dict :pos)))
+             do (when-let ((pos (oref dict pos)))
                   (insert " (" pos ")"))
-             do (when-let ((inflect (oref dict :inflection)))
+             do (when-let ((inflect (oref dict inflection)))
                   (insert " " inflect))
-             do (when-let ((gram (oref dict :grammar)))
+             do (when-let ((gram (oref dict grammar)))
                   (insert " " gram))
-             do (when (oref dict :british)
+             do (when (oref dict british)
                   (insert " ")
                   (insert-button "🔊"
                                  'action #'fanyi-play-sound
-                                 'button-data (oref dict :british)
+                                 'button-data (oref dict british)
                                  'face 'fanyi-female-speaker-face
                                  'help-echo "Play British pronunciation"
                                  'follow-link t)
                   (insert " ")
                   (insert-button "🔊"
                                  'action #'fanyi-play-sound
-                                 'button-data (oref dict :american)
+                                 'button-data (oref dict american)
                                  'face 'fanyi-male-speaker-face
                                  'help-echo "Play American pronunciation"
                                  'follow-link t))
@@ -428,24 +428,24 @@ before calling this method."
              ;;
              ;; For easy implementation, crossref is put at the end of
              ;; definition.
-             do (cl-loop for sense in (oref dict :senses)
+             do (cl-loop for sense in (oref dict senses)
                          do (insert "- ")
-                         do (when-let ((signpost (oref sense :signpost)))
+                         do (when-let ((signpost (oref sense signpost)))
                               (insert (propertize signpost
                                                   'display (when (fanyi-display-glyphs-p)
                                                              (fanyi-longman-svg-tag-make signpost 'fanyi-longman-svg-signpost-face)))
                                       " "))
-                         do (when-let ((grammar (oref sense :grammar)))
+                         do (when-let ((grammar (oref sense grammar)))
                               (insert grammar " "))
-                         do (when-let ((geo (oref sense :geo)))
+                         do (when-let ((geo (oref sense geo)))
                               (insert (propertize geo
                                                   'font-lock-face 'fanyi-longman-geo-face)
                                       " "))
-                         do (when-let ((label (oref sense :registerlab)))
+                         do (when-let ((label (oref sense registerlab)))
                               (insert (propertize label
                                                   'font-lock-face 'fanyi-longman-registerlab-face)
                                       " "))
-                         do (when-let ((unit (oref sense :lexunit)))
+                         do (when-let ((unit (oref sense lexunit)))
                               (insert "*" unit "*"
                                       " "))
                          do (seq-do (lambda (s)
@@ -460,22 +460,22 @@ before calling this method."
                                                         'button-data data
                                                         'follow-link t)
                                          (insert " "))))
-                                    (oref sense :def))
-                         do (when-let ((synonym (oref sense :syn)))
+                                    (oref sense def))
+                         do (when-let ((synonym (oref sense syn)))
                               (insert (propertize "SYN"
                                                   'display (when (fanyi-display-glyphs-p)
                                                              (fanyi-longman-svg-tag-make "SYN" 'fanyi-longman-svg-asset-face)))
                                       " "
                                       "*" synonym "*"
                                       " "))
-                         do (when-let ((crossref (oref sense :crossref)))
+                         do (when-let ((crossref (oref sense crossref)))
                               (insert-button (car crossref)
                                              'action #'fanyi-dwim
                                              'button-data (cdr crossref)
                                              'follow-link t))
                          do (insert "\n")
                          ;; Examples.
-                         do (cl-loop for example in (oref sense :examples)
+                         do (cl-loop for example in (oref sense examples)
                                      for mp3 = (car example)
                                      for expl = (cdr example)
                                      do (insert-button (if mp3 "🔊" "🔇")
@@ -491,14 +491,14 @@ before calling this method."
                                                             'wrap-prefix (s-repeat fanyi-longman-example-indent " "))
                                                 "\n"))
                          ;; Footnote.
-                         do (when-let* ((expl (oref sense :footnote-expl))
+                         do (when-let* ((expl (oref sense footnote-expl))
                                         ((s-present? expl)))
                               (insert (propertize "> "
                                                   'line-prefix (s-repeat fanyi-longman-example-indent " "))
                                       (propertize expl
                                                   'wrap-prefix (s-repeat fanyi-longman-example-indent " "))
                                       "\n"))
-                         do (when-let* ((ex (oref sense :footnote-example))
+                         do (when-let* ((ex (oref sense footnote-example))
                                         ((s-present? ex)))
                               (insert (propertize ">> "
                                                   'line-prefix (s-repeat (* 2 fanyi-longman-example-indent) " "))
@@ -508,15 +508,15 @@ before calling this method."
                                       "\n")))
              do (insert "\n"))
     ;; Etymon.
-    (when (s-present? (oref this :etymon))
+    (when (s-present? (oref this etymon))
       (insert "## Etymon\n\n")
       (insert (propertize "Origin"
                           'display (when (fanyi-display-glyphs-p)
                                      (fanyi-longman-svg-tag-make "Origin" 'fanyi-longman-svg-asset-face))))
       (insert " ")
-      (insert "*" (oref this :word) "*")
+      (insert "*" (oref this word) "*")
       (insert " ")
-      (insert (oref this :etymon)))
+      (insert (oref this etymon)))
     ;; The end.
     (while (equal (char-before) ?\n)
       (delete-char -1))

@@ -93,7 +93,7 @@ A \='not-found exception will be thrown if there is no result."
                  (gethash "entries" data)))
     (throw 'not-found nil))
   (let ((entries (gethash "entries" (gethash "data" js))))
-    (oset this :entries
+    (oset this entries
           (cl-loop for entry across entries
                    for ent = (gethash "entry" entry)
                    for explain = (gethash "explain" entry)
@@ -107,9 +107,9 @@ before calling this method."
   (fanyi-with-fanyi-buffer
    ;; The headline about Youdao thesaurus service.
    (insert "# 有道同义词词典 \n\n")
-   (cl-loop for entry in (oref this :entries)
-            for ent = (oref entry :entry)
-            for explain = (oref entry :explain)
+   (cl-loop for entry in (oref this entries)
+            for ent = (oref entry entry)
+            for explain = (oref entry explain)
             do (insert "- " ent "\n")
             ;; Prettify POS, order matters. See `fanyi-mode-font-lock-keywords'.
             do (insert (propertize

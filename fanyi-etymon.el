@@ -58,7 +58,7 @@ expected.
 The /italic/ and *bold* styles are borrowed from `org-mode',
 while the quote style is from mailing list."
   (let ((defs (dom-by-class dom "^\\(word--C9UPa\\)$")))
-    (oset this :definitions
+    (oset this definitions
           (cl-loop for def in defs
                    for title = (dom-text (dom-by-class def "word__name--TTbAA"))
                    for details = (dom-children (dom-by-class def "^\\(word__defination--2q7ZH\\)$"))
@@ -103,7 +103,7 @@ before calling this method."
   (fanyi-with-fanyi-buffer
     ;; The headline about Etymonline service.
     (insert "# Etymonline\n\n")
-    (cl-loop for i in (oref this :definitions)
+    (cl-loop for i in (oref this definitions)
              for (word def) = i
              do (insert "## " word "\n\n")
              do (seq-do (lambda (arg)
