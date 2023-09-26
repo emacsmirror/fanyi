@@ -73,6 +73,7 @@ while the quote style is from mailing list."
                                                ""
                                              "\n\n")
                                          (setq fanyi-etymon--consecutive-newlines t)))
+                                      ((pred stringp) arg)
                                       (_
                                        (cl-assert (> (length arg) 2))
                                        (setq fanyi-etymon--consecutive-newlines nil)
