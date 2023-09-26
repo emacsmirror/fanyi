@@ -96,7 +96,7 @@ A \='not-found exception will be thrown if there is no result."
     (oset this entries
           (cl-loop for entry across entries
                    for ent = (gethash "entry" entry)
-                   for explain = (gethash "explain" entry)
+                   for explain = (or (gethash "explain" entry) "NO EXPLANATION")
                    collect (fanyi-youdao-thesaurus-entry :entry ent
                                                          :explain explain)))))
 
